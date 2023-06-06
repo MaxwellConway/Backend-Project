@@ -3,9 +3,24 @@ const app = express();
 const PORT = 3001;
 const users = require("./routes/users");
 const concerts = require("./routes/concerts");
+const linkedUserConcerts = require("./routes/linkedUserConcerts");
+const authentication = require("./routes/authentication");
+const bcrypt = require(`bcrypt`);
+const passport = require(`passport`);
+const LocalStrategy = require("passport-local").Strategy;
+const bodyParser = require("body-parser");
+
+app.set("views", "./views");
+app.set("view engine", "ejs");
+
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.json());
+app.use(express.static(__dirname + "/views/partials"));
+
 app.use("/users", users);
 app.use("/concerts", concerts);
+app.use("/linkedUserConcerts", linkedUserConcerts);
+app.use("/login", authentication);
 
 async function getConcerts() {
   const concerts = await fetch(
