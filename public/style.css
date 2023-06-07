@@ -10,3 +10,11 @@ body {
   border-color: antiquewhite;
   border-width: 1px;
 }
+
+.form {
+  font-family: "Courier New", Courier, monospace;
+  padding-top: 10%;
+  text-align: center;
+  border-color: antiquewhite;
+  border-width: 1px;
+}

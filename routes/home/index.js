@@ -12,13 +12,13 @@ function logRequest(req, res, next) {
 }
 
 router.get("/", (req, res) => {
-  res.render("./login/login.ejs");
+  res.render("./home/home.ejs");
 });
 
 router.post("/login", (req, res) => {
   // passport stuff
   console.log(req.body);
-  res.redirect("/home");
+  res.redirect("../home/home.ejs");
 });
 
 router.get("/signup", (req, res) => {
