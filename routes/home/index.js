@@ -9,15 +9,16 @@ const LocalStrategy = require("passport-local").Strategy;
 
 function authenticate(req, res, next) {
   passport.authenticate("local", (err, user, info) => {
+    console.log(err, user, info);
     if (err) {
       return next(err);
     }
     if (!user) {
       return res.status(401).json({
-        message: "Email or password did not match. Please try again.",
+        message: "Invalid email or password",
       });
     }
-    req.login(user, (err) => {
+    req.logIn(user, (err) => {
       if (err) {
         return next(err);
       }
@@ -25,8 +26,16 @@ function authenticate(req, res, next) {
     });
   })(req, res, next);
 }
-router.get("/", authenticate, (req, res) => {
+
+router.get("/", ensureAuthenticated, (req, res) => {
   res.render("./home/home.ejs");
 });
+
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect("/login");
+}
 
 module.exports = router;

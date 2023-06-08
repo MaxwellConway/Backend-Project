@@ -1,0 +1,25 @@
+body {
+  background-color: black;
+  color: white;
+}
+
+.form {
+  font-family: "Courier New", Courier, monospace;
+  padding-top: 1%;
+  text-align: center;
+  border-color: antiquewhite;
+  border-width: 1px;
+}
+
+.mainContainer {
+  border-color: antiquewhite;
+}
+.leftContainer {
+  border-color: antiquewhite;
+  width: 50%;
+}
+
+.rightContainer {
+  border-color: antiquewhite;
+  width: 50%;
+}
