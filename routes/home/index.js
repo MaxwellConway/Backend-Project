@@ -2,40 +2,23 @@ const express = require("express");
 const router = express.Router();
 const ejs = require("ejs");
 const { Users } = require("../../models");
+const authenticate = require("../../passport");
 
-const bcrypt = require(`bcrypt`);
-const passport = require(`passport`);
-const LocalStrategy = require("passport-local").Strategy;
+//router.get("/", ensureAuthenticated, (req, res) => {
+//  res.render("./home/home.ejs");
+//});
 
-function authenticate(req, res, next) {
-  passport.authenticate("local", (err, user, info) => {
-    console.log(err, user, info);
-    if (err) {
-      return next(err);
-    }
-    if (!user) {
-      return res.status(401).json({
-        message: "Invalid email or password",
-      });
-    }
-    req.logIn(user, (err) => {
-      if (err) {
-        return next(err);
-      }
-      next();
-    });
-  })(req, res, next);
-}
+router.get("/", authenticate, async (req, res) => {
+  try {
+    // Fetch data from the database
+    const data = await Users.linkedUserConcerts(); // Replace "Users" with your actual model name or database query
 
-router.get("/", ensureAuthenticated, (req, res) => {
-  res.render("./home/home.ejs");
-});
-
-function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) {
-    return next();
+    // Render the EJS template and pass the data
+    res.render("./home/home.ejs", { data }); // Pass the retrieved data as an object property
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).send("Internal Server Error");
   }
-  res.redirect("/login");
-}
+});
 
 module.exports = router;

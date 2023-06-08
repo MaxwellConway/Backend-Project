@@ -9,11 +9,6 @@ const concerts = require("./routes/concerts");
 const linkedUserConcerts = require("./routes/linkedUserConcerts");
 const authentication = require("./routes/authentication");
 const home = require("./routes/home");
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(express.static("public")); // Add this line to serve static files from the 'public' directory
-
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const session = require("express-session");
@@ -27,10 +22,14 @@ app.use(
     secret: "keyboard cat",
     store: myStore,
     resave: false,
-    proxy: true,
+    saveUninitialized: false,
   })
 );
 myStore.sync();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(express.static("public")); // Add this line to serve static files from the 'public' directory
 
 // where tf does this go
 passport.use(
@@ -44,6 +43,7 @@ passport.use(
       try {
         // Find the user by email
         const userToFind = await Users.findOne({
+          raw: true,
           where: {
             email: email,
           },
@@ -79,6 +79,7 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (id, done) => {
   try {
     const userToFind = await Users.findOne({
+      raw: true,
       where: {
         id: id,
       },
@@ -108,20 +109,18 @@ app.use("/login", authentication);
 app.use("/signup", authentication);
 app.use("/home", home);
 
-async function getConcerts() {
-  const concerts = await fetch(
-    "https://app.ticketmaster.com/discovery/v2/events.json?classificationName=rock&size=100&dmaId=220&apikey=83FaiAZhCP41A21Ku8BCVMDVxlV9UOO8",
-    {
-      method: "GET",
-    }
-  );
-
-  const json = await concerts.json();
-  const concertsArray = json._embedded.events[82];
-  //console.log(concertsArray);
-  //return concertsArray;
-}
-
-console.log(getConcerts());
+//async function getConcerts() {
+//  const concerts = await fetch(
+//    "https://app.ticketmaster.com/discovery/v2/events.json?classificationName=rock&size=100&dmaId=220&apikey=83FaiAZhCP41A21Ku8BCVMDVxlV9UOO8",
+//    {
+//      method: "GET",
+//    }
+//  );
+//
+//  const json = await concerts.json();
+//  const concertsArray = json._embedded.events[82];
+//  //console.log(concertsArray);
+//  //return concertsArray;
+//}
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));

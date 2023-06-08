@@ -1,30 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const ejs = require("ejs");
+const authenticate = require("../../passport");
 
 const bcrypt = require(`bcrypt`);
 const passport = require(`passport`);
 const { where } = require("sequelize");
-const LocalStrategy = require("passport-local").Strategy;
-
-function authenticate(req, res, next) {
-  passport.authenticate("local", (err, user, info) => {
-    if (err) {
-      return next(err);
-    }
-    if (!user) {
-      return res.status(401).json({
-        message: "Email or password did not match. Please try again.",
-      });
-    }
-    req.login(user, (err) => {
-      if (err) {
-        return next(err);
-      }
-      next();
-    });
-  })(req, res, next);
-}
 
 router.get("/", (req, res) => {
   res.render("./login/login.ejs");

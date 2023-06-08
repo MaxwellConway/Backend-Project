@@ -8,7 +8,6 @@ const { Users } = require("../../models");
 
 router.get("/get_users", async (req, res) => {
   const users = await Users.findAll();
-  console.log(users);
   res.send(users);
 });
 

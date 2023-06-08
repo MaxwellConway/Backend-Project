@@ -1,6 +1,4 @@
 body {
-  background-color: black;
-  color: white;
 }
 
 .form {
@@ -13,13 +11,21 @@ body {
 
 .mainContainer {
   border-color: antiquewhite;
+  padding-top: 5%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-areas: "leftContainer rightContainer";
 }
 .leftContainer {
-  border-color: antiquewhite;
-  width: 50%;
+  border-color: black;
+  border-style: solid;
+  width: 90%;
+  text-align: center;
 }
 
 .rightContainer {
-  border-color: antiquewhite;
-  width: 50%;
+  border-color: black;
+  border-style: solid;
+  width: 90%;
+  text-align: center;
 }
