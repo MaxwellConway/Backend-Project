@@ -1,23 +1,59 @@
 const express = require("express");
 const router = express.Router();
 const ejs = require("ejs");
-const { Users } = require("../../models");
 
 const bcrypt = require(`bcrypt`);
 const passport = require(`passport`);
+const { where } = require("sequelize");
 const LocalStrategy = require("passport-local").Strategy;
 
-function logRequest(req, res, next) {
-  console.log(`[$new Date().ISOString]`);
+function authenticate(req, res, next) {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return res.status(401).json({
+        message: "Email or password did not match. Please try again.",
+      });
+    }
+    req.login(user, (err) => {
+      if (err) {
+        return next(err);
+      }
+      next();
+    });
+  })(req, res, next);
 }
 
 router.get("/", (req, res) => {
   res.render("./login/login.ejs");
 });
 
-router.post("/login", (req, res) => {
+router.post("/login", authenticate, (req, res) => {
   // passport stuff
-  console.log(req.body);
+  //const { email, password } = req.body;
+  //if (!email) {
+  //  res.status(400).send("Please include an email");
+  //  return;
+  //}
+  //if (!password) {
+  //  res.status(400).send("Please include a password");
+  //  return;
+  //}
+  //const userToFind = await Users.findOne({
+  //  where: {
+  //    email: email,
+  //  },
+  //});
+  ////compare the user password from req.body with the corresponding password in the database
+  ////this returns true if the passwords match
+  //if (!passwordMatch) {
+  //  res.status(403).send("Incorrect password");
+  //  return;
+  //}
+  //
+  //console.log(passwordMatch);
   res.redirect("/home");
 });
 
@@ -34,8 +70,17 @@ router.post("/signup", async (req, res) => {
     username: req.body.username,
     password: hashedPassword,
   });
-  if (signUp.error) {
-    res.status(400).send("There was an issue creating the user");
+  const { email, password, username } = req.body;
+  if (!email) {
+    res.status(400).send("Please include an email");
+    return;
+  }
+  if (!password) {
+    res.status(400).send("Please include a password");
+    return;
+  }
+  if (!username) {
+    res.status(400).send("Please include a username");
     return;
   }
   // user create code goes here

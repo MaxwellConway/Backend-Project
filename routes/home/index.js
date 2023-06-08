@@ -7,41 +7,26 @@ const bcrypt = require(`bcrypt`);
 const passport = require(`passport`);
 const LocalStrategy = require("passport-local").Strategy;
 
-function logRequest(req, res, next) {
-  console.log(`[$new Date().ISOString]`);
+function authenticate(req, res, next) {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return res.status(401).json({
+        message: "Email or password did not match. Please try again.",
+      });
+    }
+    req.login(user, (err) => {
+      if (err) {
+        return next(err);
+      }
+      next();
+    });
+  })(req, res, next);
 }
-
-router.get("/", (req, res) => {
+router.get("/", authenticate, (req, res) => {
   res.render("./home/home.ejs");
-});
-
-router.post("/login", (req, res) => {
-  // passport stuff
-  console.log(req.body);
-  res.redirect("../home/home.ejs");
-});
-
-router.get("/signup", (req, res) => {
-  // passport stuff
-  res.render("./signup/signup.ejs");
-});
-
-router.post("/signup", async (req, res) => {
-  const saltRounds = 10;
-  const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
-  const signUp = await Users.create({
-    email: req.body.email,
-    username: req.body.username,
-    password: hashedPassword,
-  });
-  if (signUp.error) {
-    res.status(400).send("There was an issue creating the user");
-    return;
-  }
-  // user create code goes here
-  // bcrypt goes here too
-  // redirect them to the login page
-  res.redirect("/login");
 });
 
 module.exports = router;
