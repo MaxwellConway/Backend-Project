@@ -39,6 +39,7 @@ app.use("/concerts", concerts);
 app.use("/linkedUserConcerts", linkedUserConcerts);
 app.use("/login", authentication);
 app.use("/signup", authentication);
+app.use("/logout", home);
 app.use("/home", home);
 app.use("/searchResults", searchResults);
 

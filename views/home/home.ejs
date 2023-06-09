@@ -8,15 +8,27 @@
     <link rel="stylesheet" href="/homestyle.css" />
   </head>
   <body>
+    <h1>Welcome <%= userData.username %></h1>
+    <p>Email: <%= userData.email %></p>
     <div class="container">
-      <form class="form" action="/searchResults/searchResults" method="post">
+      <form class="form" action="/home/home" method="post">
         <input type="text" name="search" value="" />
         <input type="submit" value="Search" />
       </form>
     </div>
+    <div class="container">
+      <form class="form" action="/home/logout" method="post">
+        <input type="submit" value="Logout" />
+      </form>
+    </div>
     <div class="mainContainer">
-      <div class="leftContainer"></div>
-      <div class="rightContainer">hello</div>
+      <div class="leftContainer">
+        <!-- Display user-specific data from userData object -->
+        <p>Email: <%= userData.email %></p>
+        <p>Username: <%= userData.username %></p>
+        <!-- Add more properties as needed -->
+      </div>
+      <div class="rightContainer"></div>
     </div>
   </body>
 </html>
