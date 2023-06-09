@@ -1,45 +1,72 @@
 const express = require("express");
 const router = express.Router();
 const ejs = require("ejs");
-const authenticate = require("../../passport");
-
+// const authenticate = require("../../passport");
+const { Users } = require("../../models");
 const bcrypt = require(`bcrypt`);
-const passport = require(`passport`);
-const { where } = require("sequelize");
+const jwt = require("jsonwebtoken");
+const cookieJwtAuth = require("../../middleware/cookieJwtAuth");
 
 router.get("/", (req, res) => {
   res.render("./login/login.ejs");
 });
 
-router.post("/login", authenticate, (req, res) => {
-  // passport stuff
-  //const { email, password } = req.body;
-  //if (!email) {
-  //  res.status(400).send("Please include an email");
-  //  return;
-  //}
-  //if (!password) {
-  //  res.status(400).send("Please include a password");
-  //  return;
-  //}
-  //const userToFind = await Users.findOne({
-  //  where: {
-  //    email: email,
-  //  },
-  //});
-  ////compare the user password from req.body with the corresponding password in the database
-  ////this returns true if the passwords match
-  //if (!passwordMatch) {
-  //  res.status(403).send("Incorrect password");
-  //  return;
-  //}
-  //
-  //console.log(passwordMatch);
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  // Check for missing email and password
+  if (!email || !password) {
+    res.status(400).send("Please include both email and password");
+    return;
+  }
+
+  // Retrieve user from the database
+  const user = await Users.findOne({ where: { email: email } });
+
+  // Check if the user exists
+  if (!user) {
+    res.status(401).send("Invalid email or password");
+    return;
+  }
+
+  // Verify the password
+  const passwordMatch = await bcrypt.compare(password, user.password);
+
+  // Check if the password is correct
+  if (!passwordMatch) {
+    res.status(401).send("Invalid email or password");
+    return;
+  }
+
+  // Generate a JWT token
+  const token = jwt.sign({ userId: user.id }, "secret");
+  //const expirationTime = 60 * 60 * 1000; // 1 hour in milliseconds
+
+  // Set the JWT token as a cookie
+  res.cookie("token", token);
+
   res.redirect("/home");
 });
 
+// router.post("/login", cookieJwtAuth, async (req, res) => {
+//   const { email, password } = req.body;
+//   const userToFind = await Users.findOne({
+//     where: {
+//       email: email,
+//     },
+//   });
+//   if (!email) {
+//     res.status(400).send("Please include an email");
+//     return;
+//   }
+//   if (!password) {
+//     res.status(400).send("Please include a password");
+//     return;
+//   }
+//   res.redirect("/home");
+// });
+
 router.get("/signup", (req, res) => {
-  // passport stuff
   res.render("./signup/signup.ejs");
 });
 
@@ -64,9 +91,6 @@ router.post("/signup", async (req, res) => {
     res.status(400).send("Please include a username");
     return;
   }
-  // user create code goes here
-  // bcrypt goes here too
-  // redirect them to the login page
   res.redirect("/login");
 });
 

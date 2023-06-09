@@ -5,11 +5,5 @@ const { Users } = require("../../models");
 const { cookieJwtAuth } = require("../../middleware/cookieJwtAuth");
 
 router.get("/", cookieJwtAuth, async (req, res) => {
-  res.render("./home/home.ejs");
+  res.render("./searchResults/searchResults.ejs");
 });
-
-router.post("/home", cookieJwtAuth, async (req, res) => {
-  res.redirect("./searchResults/searchResults.ejs");
-});
-
-module.exports = router;

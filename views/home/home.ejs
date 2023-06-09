@@ -9,18 +9,13 @@
   </head>
   <body>
     <div class="container">
-      <form class="form" action="/login/signup" method="post">
+      <form class="form" action="/searchResults/searchResults" method="post">
         <input type="text" name="search" value="" />
         <input type="submit" value="Search" />
       </form>
     </div>
     <div class="mainContainer">
-      <div class="leftContainer">
-        <% data.forEach(function(item) { %>
-        <p><%= item.email %></p>
-        <!-- Replace "property" with the actual property/key of the retrieved data object -->
-        <% }); %>
-      </div>
+      <div class="leftContainer"></div>
       <div class="rightContainer">hello</div>
     </div>
   </body>
