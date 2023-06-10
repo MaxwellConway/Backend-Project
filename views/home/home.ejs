@@ -9,9 +9,14 @@
   </head>
   <body>
     <div class="container">
-      <form class="form" action="/home/home" method="post">
-        <input type="text" name="search" value="" />
-        <input type="submit" value="Search" />
+      <form
+        id="searchForm"
+        class="form"
+        action="javascript:void(0)"
+        method="post"
+      >
+        <input id="searchInput" type="text" name="search" value="" />
+        <input id="searchButton" type="submit" value="Search" />
       </form>
     </div>
     <div class="container">
@@ -41,6 +46,56 @@
         </div>
         <% }); %>
       </div>
+      <div id="searchResultsContainer"></div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        // Attach an event listener to the search button
+        $("#searchForm").submit(function (event) {
+          event.preventDefault(); // Prevent form submission
+
+          var searchKeyword = $("#searchInput").val();
+          searchEvents(searchKeyword);
+        });
+
+        function searchEvents(keyword) {
+          $.ajax({
+            type: "GET",
+            url: "https://app.ticketmaster.com/discovery/v2/events.json",
+            async: true,
+            dataType: "json",
+            data: {
+              keyword: keyword,
+              size: 10,
+              apikey: "83FaiAZhCP41A21Ku8BCVMDVxlV9UOO8",
+              // Add other query parameters as needed
+            },
+            success: function (json) {
+              console.log(json);
+              // Parse the response and handle the search results
+              displaySearchResults(json);
+            },
+            error: function (xhr, status, err) {
+              console.error(err);
+              // Handle the error case
+            },
+          });
+        }
+        function displaySearchResults(json) {
+          var searchResultsContainer = $("#searchResultsContainer");
+          searchResultsContainer.empty(); // Clear previous search results
+
+          // Loop through the search results and create the HTML for each result
+          json.results.forEach(function (result) {
+            var resultElement = $("<div>").addClass("searchResult");
+            resultElement.append($("<h2>").text(result.name));
+            // Add other relevant data from the search results
+
+            searchResultsContainer.append(resultElement);
+          });
+        }
+      });
+    </script>
   </body>
 </html>

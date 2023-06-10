@@ -144,10 +144,26 @@ router.get("/", cookieJwtAuth, async (req, res) => {
   }
 });
 
-router.post("/home", cookieJwtAuth, async (req, res) => {
-  res.redirect("/searchResults");
-});
-
+//router.post("/search", cookieJwtAuth, async (req, res) => {
+//  try {
+//    const searchQuery = req.body.search; // Get the search term from the request body
+//
+//    // Perform the search operation based on the searchQuery
+//    // Retrieve the search results from the API or database
+//    // You can customize this part based on your application's logic
+//
+//    const searchResults = []; // Replace with the actual search results
+//
+//    res.render("home", {
+//      searchResults: searchResults || [],
+//      userData: req.userData,
+//    }); // Pass searchResults (or an empty array) and userData to the home.ejs view
+//  } catch (error) {
+//    console.error(error);
+//    res.status(500).send("Internal Server Error");
+//  }
+//});
+//
 router.post("/logout", function (req, res) {
   res.clearCookie("token");
   res.redirect("/login");
