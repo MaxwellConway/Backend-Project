@@ -13,7 +13,6 @@ const fetchUserData = async (userId) => {
   try {
     // Retrieve the user data from the database based on the userId
     const userData = await Users.findOne({ where: { id: userId } });
-    console.log(userData);
 
     return userData;
   } catch (error) {
@@ -133,9 +132,12 @@ router.get("/", cookieJwtAuth, async (req, res) => {
       };
     });
 
-    console.log("concerts:", concerts);
-
-    res.render("home/home", { concerts, userData: userData, userId });
+    res.render("home/home", {
+      concerts,
+      userData: userData,
+      userId,
+      linkedConcerts,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error");

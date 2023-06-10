@@ -20,19 +20,17 @@
       </form>
     </div>
     <div class="usernameContainer">
-      <p></p>
+      <p>Username: <%= userData.username %></p>
     </div>
     <div class="mainContainer">
       <div class="leftContainer">
-        <% concerts.forEach(function(concert) { %> <% if
-        (concert.linkedUserConcerts) { %> <%
-        concert.linkedUserConcerts.forEach(function(linkedUserConcert) { %> <%
-        if (linkedUserConcert.userId === userId) { %>
-        <!-- Check if the linkedUserConcert's userId matches the current user's userId -->
-        <p><%= concert.concert.name %></p>
-        <!-- Display the concert name -->
-        <% } %> <% }); %> <% } %> <% }); %>
+        <% linkedConcerts.forEach(function(linkedConcert) { %> <% if
+        (linkedConcert.userId === userData.id) { %>
+        <!-- Update the condition to use userData.id -->
+        <p><%= linkedConcert.Concert.name %></p>
+        <% } %> <% }); %>
       </div>
+
       <div class="rightContainer">
         <% concerts.forEach(function(concert) { %>
         <div>
