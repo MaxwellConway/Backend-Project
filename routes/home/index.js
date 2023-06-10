@@ -2,6 +2,10 @@ const express = require("express");
 const router = express.Router();
 const ejs = require("ejs");
 const { Users } = require("../../models");
+const { Concerts } = require("../../models");
+const { linkedUserConcerts } = require("../../models");
+const { Op } = require("sequelize");
+
 const { cookieJwtAuth } = require("../../middleware/cookieJwtAuth");
 const jwtDecode = require("jwt-decode");
 
@@ -18,16 +22,122 @@ const fetchUserData = async (userId) => {
   }
 };
 
+//router.get("/", cookieJwtAuth, async (req, res) => {
+//  try {
+//    const token = req.cookies.token;
+//    const decodedToken = jwtDecode(token);
+//    const userId = decodedToken.userId;
+//    const userData = await fetchUserData(userId);
+//    // Find the concerts associated with the logged-in user
+//    const linkedConcerts = await linkedUserConcerts.findAll({
+//      where: {
+//        userId: userId,
+//      },
+//      include: [
+//        {
+//          model: Concerts,
+//        },
+//      ],
+//    });
+//
+//    // Extract the concertIds associated with the logged-in user
+//    const concertIds = linkedConcerts.map(
+//      (linkedConcert) => linkedConcert.concertId
+//    );
+//
+//    // Find the linkedUserConcerts associated with the same concertIds but with different userIds
+//    const otherLinkedConcerts = await linkedUserConcerts.findAll({
+//      where: {
+//        concertId: concertIds,
+//        userId: {
+//          [Op.ne]: userId,
+//        },
+//      },
+//      include: [
+//        {
+//          model: Users,
+//        },
+//      ],
+//    });
+//
+//    // Organize the concert data and associated usernames
+//    const concerts = linkedConcerts.map((linkedConcert) => {
+//      const concert = linkedConcert.Concert;
+//      const associatedUsernames = otherLinkedConcerts
+//        .filter(
+//          (otherLinkedConcert) =>
+//            otherLinkedConcert.concertId === linkedConcert.concertId
+//        )
+//        .map((otherLinkedConcert) => otherLinkedConcert.User.username);
+//      return {
+//        concert,
+//        associatedUsernames,
+//      };
+//    });
+//
+//    res.render("home/home.ejs", { concerts, userData: userData });
+//  } catch (error) {
+//    console.error(error);
+//    res.status(500).send("Internal Server Error");
+//  }
+//});
+//
+
 router.get("/", cookieJwtAuth, async (req, res) => {
   try {
     const token = req.cookies.token;
     const decodedToken = jwtDecode(token);
     const userId = decodedToken.userId;
     const userData = await fetchUserData(userId);
-    res.render("./home/home.ejs", { userData: userData });
+
+    const linkedConcerts = await linkedUserConcerts.findAll({
+      where: {
+        userId: userId,
+      },
+      include: [
+        {
+          model: Concerts,
+        },
+      ],
+    });
+
+    const concertIds = linkedConcerts.map(
+      (linkedConcert) => linkedConcert.concertId
+    );
+
+    const otherLinkedConcerts = await linkedUserConcerts.findAll({
+      where: {
+        concertId: concertIds,
+        userId: {
+          [Op.ne]: userId,
+        },
+      },
+      include: [
+        {
+          model: Users,
+        },
+      ],
+    });
+
+    const concerts = linkedConcerts.map((linkedConcert) => {
+      const concert = linkedConcert.Concert;
+      const associatedUsernames = otherLinkedConcerts
+        .filter(
+          (otherLinkedConcert) =>
+            otherLinkedConcert.concertId === linkedConcert.concertId
+        )
+        .map((otherLinkedConcert) => otherLinkedConcert.User.username);
+      return {
+        concert,
+        associatedUsernames,
+      };
+    });
+
+    console.log("concerts:", concerts);
+
+    res.render("home/home", { concerts, userData: userData, userId });
   } catch (error) {
-    // Handle any errors that occur during the process
-    console.log("Error:", error);
+    console.error(error);
     res.status(500).send("Internal Server Error");
   }
 });
