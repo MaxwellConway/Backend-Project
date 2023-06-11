@@ -13,13 +13,21 @@ router.get("/get_concerts", async (req, res) => {
 
 router.post("/new_concert", async (req, res) => {
   const { concertCode, name, date, url } = req.body;
-  const newConcert = await Concerts.create({
-    concertCode: concertCode,
-    name: name,
-    date: date,
-    url: url,
-  });
-  res.send(newConcert);
+
+  try {
+    // Create a new concert record in the database
+    const newConcert = await Concerts.create({
+      concertCode: concertCode,
+      name: name,
+      date: date,
+      url: url,
+    });
+
+    res.status(200).json(newConcert);
+  } catch (error) {
+    console.error("Error creating concert:", error);
+    res.status(500).json({ error: "Failed to create concert" });
+  }
 });
 
 router.put("/update_concert/:id", async (req, res) => {

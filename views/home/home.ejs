@@ -19,9 +19,9 @@
         <input id="searchButton" type="submit" value="Search" />
       </form>
     </div>
-    <div class="container">
+    <div id="logoutContainer" class="container">
       <form class="form" action="/home/logout" method="post">
-        <input type="submit" value="Logout" />
+        <input id="logoutButton" type="submit" value="Logout" />
       </form>
     </div>
     <div class="usernameContainer">
@@ -46,15 +46,42 @@
         </div>
         <% }); %>
       </div>
-      <div id="searchResultsContainer"></div>
+      <div id="searchResultsContainer" class="searchResultsContainer"></div>
+      <div id="paginationContainer" style="text-align: center">
+        <button id="previousButton" style="margin-right: 5px; display: none">
+          Previous
+        </button>
+        <button id="nextButton" style="margin-left: 5px; display: none">
+          Next
+        </button>
+      </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
       $(document).ready(function () {
+        var currentPage = 0;
+        var pageSize = 10;
+        var totalResults = 0;
+
         // Attach an event listener to the search button
         $("#searchForm").submit(function (event) {
           event.preventDefault(); // Prevent form submission
 
+          var searchKeyword = $("#searchInput").val();
+          currentPage = 0; // Reset current page when performing a new search
+          searchEvents(searchKeyword);
+        });
+
+        // Attach an event listener to the "Previous" button
+        $("#previousButton").click(function () {
+          currentPage--;
+          var searchKeyword = $("#searchInput").val();
+          searchEvents(searchKeyword);
+        });
+
+        // Attach an event listener to the "Next" button
+        $("#nextButton").click(function () {
+          currentPage++;
           var searchKeyword = $("#searchInput").val();
           searchEvents(searchKeyword);
         });
@@ -67,14 +94,17 @@
             dataType: "json",
             data: {
               keyword: keyword,
-              size: 10,
+              page: currentPage,
+              size: pageSize,
+              sort: "date,asc", // Sort by date in ascending order
               apikey: "83FaiAZhCP41A21Ku8BCVMDVxlV9UOO8",
               // Add other query parameters as needed
             },
             success: function (json) {
-              console.log(json);
+              console.log(json._embedded.events);
+              totalResults = json.page.totalElements;
               // Parse the response and handle the search results
-              displaySearchResults(json);
+              displaySearchResults(json._embedded.events);
             },
             error: function (xhr, status, err) {
               console.error(err);
@@ -82,19 +112,70 @@
             },
           });
         }
-        function displaySearchResults(json) {
-          var searchResultsContainer = $("#searchResultsContainer");
-          searchResultsContainer.empty(); // Clear previous search results
 
-          // Loop through the search results and create the HTML for each result
-          json.results.forEach(function (result) {
-            var resultElement = $("<div>").addClass("searchResult");
-            resultElement.append($("<h2>").text(result.name));
-            // Add other relevant data from the search results
+        function displaySearchResults(events) {
+          var searchResultsContainer = $("#searchResultsContainer");
+
+          // Clear previous search results if it's the first page
+          if (currentPage === 0) {
+            searchResultsContainer.empty();
+          }
+
+          // Loop through the events and create the HTML for each result
+          events.forEach(function (event) {
+            var resultElement = $("<div>")
+              .addClass("searchResult")
+              .hide() // Hide the result initially
+              .append($("<h2>").text(event.name))
+              .append($("<p>").text("Date: " + event.dates.start.localDate))
+              .append($("<p>").text("ID: " + event.id))
+              .append($("<a>").attr("href", event.url).text("View Details"))
+              .append(
+                $("<button>").text("Add Concert").addClass("addConcertButton")
+              )
+              .data("concert", {
+                concertCode: event.id,
+                name: event.name,
+                date: event.dates.start.localDate,
+                url: event.url,
+              });
 
             searchResultsContainer.append(resultElement);
+
+            // Use a timeout to gradually show the result with the fade-in animation
+            setTimeout(function () {
+              resultElement.addClass("loaded").show();
+            }, 100 * (searchResultsContainer.children().length - 1));
+          });
+
+          // Show/hide the "Previous" and "Next" buttons based on the current page
+          $("#previousButton").toggle(currentPage > 0);
+          $("#nextButton").toggle((currentPage + 1) * pageSize < totalResults);
+
+          // Attach event listener to the "Add Concert" button
+          $(document).on("click", ".addConcertButton", function () {
+            var concertData = $(this).closest(".searchResult").data("concert");
+
+            // Make a POST request to the "/new_concert" route with the concert data
+            $.ajax({
+              url: "./concerts/new_concert",
+              method: "POST",
+              data: concertData,
+              success: function (response) {
+                console.log("Concert added:", response);
+                // You can perform additional actions after the concert is added
+              },
+              error: function (xhr, status, error) {
+                console.error("Error adding concert:", error);
+                // Handle the error scenario if needed
+              },
+            });
           });
         }
+        $("#logoutContainer").css({
+          top: "10px",
+          right: "10px",
+        });
       });
     </script>
   </body>

@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const ejs = require("ejs");
-
+const { Users } = require("../../models");
+const { Concerts } = require("../../models");
 const { linkedUserConcerts } = require("../../models");
 
 //CRUD
