@@ -29,13 +29,26 @@
     </div>
     <div class="mainContainer">
       <div class="leftContainer">
-        <% linkedConcerts.forEach(function(linkedConcert) { %> <% if
-        (linkedConcert.userId === userData.id) { %>
-        <!-- Update the condition to use userData.id -->
-        <p><%= linkedConcert.Concert.name %></p>
-        <% } %> <% }); %>
+        <% concerts.forEach((concert) => { %>
+        <div class="concertItem">
+          <span><%= concert.concert.name %></span>
+          <form
+            action="/linkedUserConcerts/delete_linkedUserConcerts"
+            method="POST"
+            class="removeConcertForm"
+          >
+            <input
+              type="hidden"
+              name="concertId"
+              value="<%= concert.concert.id %>"
+            />
+            <button type="submit" class="removeConcertButton">
+              Remove Concert
+            </button>
+          </form>
+        </div>
+        <% }) %>
       </div>
-
       <div class="rightContainer">
         <% concerts.forEach(function(concert) { %>
         <div>
@@ -156,14 +169,33 @@
           $(document).on("click", ".addConcertButton", function () {
             var concertData = $(this).closest(".searchResult").data("concert");
 
-            // Make a POST request to the "/new_concert" route with the concert data
+            // Make a POST request to the "/concerts/new_concert" route with the concert data
             $.ajax({
-              url: "./concerts/new_concert",
+              url: "/concerts/new_concert",
               method: "POST",
               data: concertData,
               success: function (response) {
                 console.log("Concert added:", response);
-                // You can perform additional actions after the concert is added
+
+                // Once the concert is added, make another request to create a linkedUserConcert entry
+                var linkedUserConcertData = {
+                  concertId: response.id, // Use the automatically updated ID from the Concerts table
+                  userId: "<%= userData.id %>", // Use the currently logged-in user ID
+                };
+
+                $.ajax({
+                  url: "/linkedUserConcerts/new_linkedUserConcert",
+                  method: "POST",
+                  data: linkedUserConcertData,
+                  success: function (linkedUserConcert) {
+                    console.log("LinkedUserConcert added:", linkedUserConcert);
+                    // Perform additional actions after the linkedUserConcert is added
+                  },
+                  error: function (xhr, status, error) {
+                    console.error("Error adding LinkedUserConcert:", error);
+                    // Handle the error scenario if needed
+                  },
+                });
               },
               error: function (xhr, status, error) {
                 console.error("Error adding concert:", error);

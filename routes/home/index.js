@@ -137,6 +137,7 @@ router.get("/", cookieJwtAuth, async (req, res) => {
       userData: userData,
       userId,
       linkedConcerts,
+      concerts: concerts,
     });
   } catch (error) {
     console.error(error);
