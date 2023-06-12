@@ -11,7 +11,6 @@ const jwtDecode = require("jwt-decode");
 
 const fetchUserData = async (userId) => {
   try {
-    // Retrieve the user data from the database based on the userId
     const userData = await Users.findOne({ where: { id: userId } });
 
     return userData;
@@ -20,67 +19,6 @@ const fetchUserData = async (userId) => {
     throw error;
   }
 };
-
-//router.get("/", cookieJwtAuth, async (req, res) => {
-//  try {
-//    const token = req.cookies.token;
-//    const decodedToken = jwtDecode(token);
-//    const userId = decodedToken.userId;
-//    const userData = await fetchUserData(userId);
-//    // Find the concerts associated with the logged-in user
-//    const linkedConcerts = await linkedUserConcerts.findAll({
-//      where: {
-//        userId: userId,
-//      },
-//      include: [
-//        {
-//          model: Concerts,
-//        },
-//      ],
-//    });
-//
-//    // Extract the concertIds associated with the logged-in user
-//    const concertIds = linkedConcerts.map(
-//      (linkedConcert) => linkedConcert.concertId
-//    );
-//
-//    // Find the linkedUserConcerts associated with the same concertIds but with different userIds
-//    const otherLinkedConcerts = await linkedUserConcerts.findAll({
-//      where: {
-//        concertId: concertIds,
-//        userId: {
-//          [Op.ne]: userId,
-//        },
-//      },
-//      include: [
-//        {
-//          model: Users,
-//        },
-//      ],
-//    });
-//
-//    // Organize the concert data and associated usernames
-//    const concerts = linkedConcerts.map((linkedConcert) => {
-//      const concert = linkedConcert.Concert;
-//      const associatedUsernames = otherLinkedConcerts
-//        .filter(
-//          (otherLinkedConcert) =>
-//            otherLinkedConcert.concertId === linkedConcert.concertId
-//        )
-//        .map((otherLinkedConcert) => otherLinkedConcert.User.username);
-//      return {
-//        concert,
-//        associatedUsernames,
-//      };
-//    });
-//
-//    res.render("home/home.ejs", { concerts, userData: userData });
-//  } catch (error) {
-//    console.error(error);
-//    res.status(500).send("Internal Server Error");
-//  }
-//});
-//
 
 router.get("/", cookieJwtAuth, async (req, res) => {
   try {
@@ -137,7 +75,6 @@ router.get("/", cookieJwtAuth, async (req, res) => {
       userData: userData,
       userId,
       linkedConcerts,
-      concerts: concerts,
     });
   } catch (error) {
     console.error(error);
@@ -145,26 +82,6 @@ router.get("/", cookieJwtAuth, async (req, res) => {
   }
 });
 
-//router.post("/search", cookieJwtAuth, async (req, res) => {
-//  try {
-//    const searchQuery = req.body.search; // Get the search term from the request body
-//
-//    // Perform the search operation based on the searchQuery
-//    // Retrieve the search results from the API or database
-//    // You can customize this part based on your application's logic
-//
-//    const searchResults = []; // Replace with the actual search results
-//
-//    res.render("home", {
-//      searchResults: searchResults || [],
-//      userData: req.userData,
-//    }); // Pass searchResults (or an empty array) and userData to the home.ejs view
-//  } catch (error) {
-//    console.error(error);
-//    res.status(500).send("Internal Server Error");
-//  }
-//});
-//
 router.post("/logout", function (req, res) {
   res.clearCookie("token");
   res.redirect("/login");

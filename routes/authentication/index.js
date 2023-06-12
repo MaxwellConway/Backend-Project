@@ -48,6 +48,31 @@ router.post("/login", async (req, res) => {
   res.redirect("/home");
 });
 
+router.post("/guest", async (req, res) => {
+  try {
+    // Create a new guest user in the Users table
+    const guestUser = await Users.create({
+      email: "Guest",
+      username: "Guest",
+      password: "", // Set an empty password for guest users
+      // Add any other required fields for the guest user
+    });
+
+    const guestUserId = guestUser.id;
+
+    // Generate a token for the guest user
+    const token = jwt.sign({ guestUserId }, "secret");
+
+    // Set the token as a cookie
+    res.cookie("token", token);
+
+    res.redirect("/home");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 // router.post("/login", cookieJwtAuth, async (req, res) => {
 //   const { email, password } = req.body;
 //   const userToFind = await Users.findOne({

@@ -10,7 +10,6 @@ const jwtDecode = require("jwt-decode");
 
 const fetchUserData = async (userId) => {
   try {
-    // Retrieve the user data from the database based on the userId
     const userData = await Users.findOne({ where: { id: userId } });
 
     return userData;
@@ -19,8 +18,6 @@ const fetchUserData = async (userId) => {
     throw error;
   }
 };
-
-//CRUD
 
 router.get("/get_linkedUserConcerts", async (req, res) => {
   const concerts = await linkedUserConcerts.findAll();
@@ -60,7 +57,6 @@ router.post("/delete_linkedUserConcerts/", async (req, res) => {
     const userId = decodedToken.userId;
     const concertId = req.body.concertId;
 
-    // Delete the entry from the linkedUserConcerts table
     await linkedUserConcerts.destroy({
       where: {
         userId: userId,

@@ -27,8 +27,27 @@
     <div class="usernameContainer">
       <p>Username: <%= userData.username %></p>
     </div>
+    <div class="updateUsernameContainer">
+      <p id="updateUsernameLink">Update Username</p>
+      <form
+        action="/users/update_username"
+        method="POST"
+        class="updateUsernameForm"
+      >
+        <input
+          type="text"
+          name="newUsername"
+          placeholder="Enter new username"
+          required
+        />
+        <button type="submit">Update</button>
+      </form>
+    </div>
     <div class="mainContainer">
       <div class="leftContainer">
+        <div class="headerContainer">
+          <h1>My Concerts</h1>
+        </div>
         <% concerts.forEach((concert) => { %>
         <div class="concertItem">
           <span><%= concert.concert.name %></span>
@@ -50,6 +69,10 @@
         <% }) %>
       </div>
       <div class="rightContainer">
+        <div class="headerContainer">
+          <h1>Linked Concerts</h1>
+        </div>
+
         <% concerts.forEach(function(concert) { %>
         <div>
           <h2><%= concert.concert.name %></h2>
@@ -72,27 +95,32 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
       $(document).ready(function () {
+        document
+          .getElementById("updateUsernameLink")
+          .addEventListener("click", function () {
+            var updateUsernameForm = document.querySelector(
+              ".updateUsernameForm"
+            );
+            updateUsernameForm.style.display = "block";
+          });
         var currentPage = 0;
         var pageSize = 10;
         var totalResults = 0;
 
-        // Attach an event listener to the search button
         $("#searchForm").submit(function (event) {
-          event.preventDefault(); // Prevent form submission
+          event.preventDefault();
 
           var searchKeyword = $("#searchInput").val();
-          currentPage = 0; // Reset current page when performing a new search
+          currentPage = 0;
           searchEvents(searchKeyword);
         });
 
-        // Attach an event listener to the "Previous" button
         $("#previousButton").click(function () {
           currentPage--;
           var searchKeyword = $("#searchInput").val();
           searchEvents(searchKeyword);
         });
 
-        // Attach an event listener to the "Next" button
         $("#nextButton").click(function () {
           currentPage++;
           var searchKeyword = $("#searchInput").val();
@@ -109,19 +137,16 @@
               keyword: keyword,
               page: currentPage,
               size: pageSize,
-              sort: "date,asc", // Sort by date in ascending order
+              sort: "date,asc",
               apikey: "83FaiAZhCP41A21Ku8BCVMDVxlV9UOO8",
-              // Add other query parameters as needed
             },
             success: function (json) {
               console.log(json._embedded.events);
               totalResults = json.page.totalElements;
-              // Parse the response and handle the search results
               displaySearchResults(json._embedded.events);
             },
             error: function (xhr, status, err) {
               console.error(err);
-              // Handle the error case
             },
           });
         }
@@ -129,16 +154,14 @@
         function displaySearchResults(events) {
           var searchResultsContainer = $("#searchResultsContainer");
 
-          // Clear previous search results if it's the first page
           if (currentPage === 0) {
             searchResultsContainer.empty();
           }
 
-          // Loop through the events and create the HTML for each result
           events.forEach(function (event) {
             var resultElement = $("<div>")
               .addClass("searchResult")
-              .hide() // Hide the result initially
+              .hide()
               .append($("<h2>").text(event.name))
               .append($("<p>").text("Date: " + event.dates.start.localDate))
               .append($("<p>").text("ID: " + event.id))
@@ -155,21 +178,17 @@
 
             searchResultsContainer.append(resultElement);
 
-            // Use a timeout to gradually show the result with the fade-in animation
             setTimeout(function () {
               resultElement.addClass("loaded").show();
             }, 100 * (searchResultsContainer.children().length - 1));
           });
 
-          // Show/hide the "Previous" and "Next" buttons based on the current page
           $("#previousButton").toggle(currentPage > 0);
           $("#nextButton").toggle((currentPage + 1) * pageSize < totalResults);
 
-          // Attach event listener to the "Add Concert" button
           $(document).on("click", ".addConcertButton", function () {
             var concertData = $(this).closest(".searchResult").data("concert");
 
-            // Make a POST request to the "/concerts/new_concert" route with the concert data
             $.ajax({
               url: "/concerts/new_concert",
               method: "POST",
@@ -177,10 +196,9 @@
               success: function (response) {
                 console.log("Concert added:", response);
 
-                // Once the concert is added, make another request to create a linkedUserConcert entry
                 var linkedUserConcertData = {
-                  concertId: response.id, // Use the automatically updated ID from the Concerts table
-                  userId: "<%= userData.id %>", // Use the currently logged-in user ID
+                  concertId: response.id,
+                  userId: "<%= userData.id %>",
                 };
 
                 $.ajax({
@@ -189,17 +207,14 @@
                   data: linkedUserConcertData,
                   success: function (linkedUserConcert) {
                     console.log("LinkedUserConcert added:", linkedUserConcert);
-                    // Perform additional actions after the linkedUserConcert is added
                   },
                   error: function (xhr, status, error) {
                     console.error("Error adding LinkedUserConcert:", error);
-                    // Handle the error scenario if needed
                   },
                 });
               },
               error: function (xhr, status, error) {
                 console.error("Error adding concert:", error);
-                // Handle the error scenario if needed
               },
             });
           });

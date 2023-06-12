@@ -4,8 +4,6 @@ const ejs = require("ejs");
 
 const { Concerts } = require("../../models");
 
-//CRUD
-
 router.get("/get_concerts", async (req, res) => {
   const concerts = await Concerts.findAll();
   res.send(concerts);
@@ -15,7 +13,6 @@ router.post("/new_concert", async (req, res) => {
   const { concertCode, name, date, url } = req.body;
 
   try {
-    // Create a new concert record in the database
     const newConcert = await Concerts.create({
       concertCode: concertCode,
       name: name,

@@ -8,13 +8,27 @@
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
-    <div class="container">
+    <div class="headerContainer">
+      <h1>Welcome</h1>
+    </div>
+    <div class="loginContainer">
+      <p>Log in</p>
       <form action="/login/login" method="post">
-        <input type="text" name="email" />
+        <input type="text" name="email" placeholder="Email" />
 
-        <input type="password" name="password" />
+        <input type="password" name="password" placeholder="Password" />
 
         <input type="submit" value="Login" />
+      </form>
+    </div>
+    <div class="signupButtonContainer">
+      <form action="/login/signup" method="get">
+        <button type="submit">Sign-Up</button>
+      </form>
+    </div>
+    <div class="guestLoginContainer">
+      <form action="/login/guest" method="POST" class="guestLoginForm">
+        <button type="submit">Log in as Guest</button>
       </form>
     </div>
   </body>

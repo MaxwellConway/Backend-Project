@@ -9,17 +9,6 @@ const env = process.env.NODE_ENV || "development";
 const config = require(__dirname + "/../config/config.json")[env];
 const db = {};
 
-///
-//const session = require("express-session");
-//const SequelizeStore = require("connect-session-sequelize")(session.Store);
-//const { sequelize } = require("../models"); // Adjust the path if necessary
-//
-//const sessionStore = new SequelizeStore({
-//  db: sequelize,
-//});
-//
-//module.exports = sessionStore;
-//
 let sequelize;
 if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable], config);

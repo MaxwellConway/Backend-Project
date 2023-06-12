@@ -4,7 +4,19 @@ const ejs = require("ejs");
 
 const { Users } = require("../../models");
 
-//CRUD
+const { cookieJwtAuth } = require("../../middleware/cookieJwtAuth");
+const jwtDecode = require("jwt-decode");
+
+const fetchUserData = async (userId) => {
+  try {
+    const userData = await Users.findOne({ where: { id: userId } });
+
+    return userData;
+  } catch (error) {
+    console.log("Error fetching user data:", error);
+    throw error;
+  }
+};
 
 router.get("/get_users", async (req, res) => {
   const users = await Users.findAll();
@@ -21,22 +33,20 @@ router.post("/new_user", async (req, res) => {
   res.send(newUser);
 });
 
-router.put("/update_user/:id", async (req, res) => {
-  const { id } = req.params;
-  const { newEmail, newUsername, newPassword } = req.body;
-  const user = await Users.update(
-    {
-      email: `${newEmail}`,
-      username: `${newUsername}`,
-      password: `${newPassword}`,
-    },
-    {
-      where: {
-        id: id,
-      },
-    }
-  );
-  res.send("Success");
+router.post("/update_username", cookieJwtAuth, async (req, res) => {
+  try {
+    const token = req.cookies.token;
+    const decodedToken = jwtDecode(token);
+    const userId = decodedToken.userId;
+    const newUsername = req.body.newUsername;
+
+    await Users.update({ username: newUsername }, { where: { id: userId } });
+
+    res.redirect("/home");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
 router.delete("/delete_users/:id", async (req, res) => {
